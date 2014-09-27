@@ -1,14 +1,28 @@
 <head>
-  <title>inschrijftool</title>
+  <title>Inschrijftool</title>
 </head>
 
 <body>
-  <h1>Welcome to Meteor!</h1>
+  <h1>Inschrijftool</h1>
 
-  {{> hello}}
+   {{> loginButtons}}
+
+   {{#if currentUser}}
+     <br>Ingelogd als: {{currentUser.services.avans.nickname}}
+   {{else}}
+
+   {{/if}}
+
+  <table border="1">
+    {{#each days}}
+    <tr>
+      <th>Dag</th>
+    </tr>
+    {{/each}}
+  </table>
 </body>
 
-<template name="hello">
+<template name="enroll">
   <button>Click Me</button>
   <p>You've pressed the button {{counter}} times.</p>
 </template>
