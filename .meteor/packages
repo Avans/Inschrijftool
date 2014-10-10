@@ -6,9 +6,10 @@
 meteor-platform
 autopublish
 insecure
-accounts-ui
 accounts-base
 accounts-oauth
 oauth
 service-configuration
 oauth1
+accounts-ui-bootstrap-3
+bootstrap-3

@@ -1,28 +1,151 @@
 <head>
   <title>Inschrijftool</title>
+  <style>
+  .navbar-nav .btn {
+    margin-bottom: 8px;
+    margin-top: 8px;
+  }
+
+  .enroll:hover {
+    cursor: pointer;
+    transition: all 0.2s ease-in;
+  }
+  td {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+    height: 50px;
+    transition: all 0.2s ease-out;
+  }
+  td .unroll {
+    opacity: 0;
+
+  }
+
+  td:hover .unroll {
+    opacity: .2;
+  }
+  </style>
 </head>
 
 <body>
-  <h1>Inschrijftool</h1>
-
-   {{> loginButtons}}
-
-   {{#if currentUser}}
-     <br>Ingelogd als: {{currentUser.services.avans.nickname}}
-   {{else}}
-
-   {{/if}}
-
-  <table border="1">
-    {{#each days}}
-    <tr>
-      <th>Dag</th>
-    </tr>
-    {{/each}}
-  </table>
+  {{> enroll}}
 </body>
 
 <template name="enroll">
-  <button>Click Me</button>
-  <p>You've pressed the button {{counter}} times.</p>
+  <header class="navbar navbar-default" id="top" role="banner">
+    <div class="container">
+      <div class="navbar-header">
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand">{{course.name}}</a>
+      </div>
+      <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+
+        <ul class="nav navbar-nav navbar-right">
+          <li><a></a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          {{#if currentUser}}<li class="navbar-text">Ingelogd als {{currentUser.services.avans.nickname}}</li>{{/if}}
+          {{> loginButtons }}
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+   {{#if course}}
+
+   {{#if isTeacher}}
+   <div class="well hidden-print">
+     <button class="deletecourse">Verwijder deze pagina</button>
+     <label>Naam: <input type="text" value="{{course.name}}" class="course-name"></label><br>
+     Dagen: <input type="number" step="1" value="{{course.number_of_days}}" class="number_of_days"><br>
+     Timeslots: <input type="number" step="1" value="{{course.number_of_timeslots}}" class="number_of_timeslots"><br>
+
+     Max aantal studenten: {{maxNumberOfStudents}}<br>
+     Max aantal studenten in duo's: {{maxNumberOfStudentsInDuos}}
+    </div>
+    {{/if}}
+
+   <div style="width: 80%; margin: 0 auto;">
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th></th>
+        {{#each days}}
+        <th>
+          {{#if isTeacher}}
+            <input value="{{name}}" data-day-index="{{index}}" class="day hidden-print">
+            <span class="visible-print">{{name}}</span>
+          {{else}}
+            {{name}}
+          {{/if}}
+        </th>
+        {{/each}}
+      </tr>
+    </thead>
+
+    <tbody>
+      {{#each timeslots}}
+      <tr>
+        <th>
+          {{#if isTeacher}}
+            <input value="{{name}}" data-timeslot-index="{{index}}" class="timeslot hidden-print">
+            <span class="visible-print">{{name}}</span>
+          {{else}}
+            {{name}}
+          {{/if}}
+        </th>
+
+        {{#each days}}
+
+        {{#with enrollmentInTimeslot index ../index}}
+          {{> enrollment}}
+        {{else}}
+          <td class="{{#if currentUser}}enroll{{/if}}" data-day-index={{index}} data-timeslot-index={{../index}}>
+          </td>
+        {{/with}}
+
+        {{/each}}
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+
+
+
+
+   {{else}}
+     {{#if isTeacher}}
+     <div class="alert alert-info">
+       <p>Er is nog geen inschrijving actief op deze url</p>
+       <button class="btn btn-primary makecourse">Maak inschrijving aan op {{url}}</button>
+     </div>
+     {{/if}}
+   {{/if}}
+</template>
+
+<template name="enrollment">
+  <td class="{{#if isOwnEnrollment}}info{{else}}warning{{/if}}">
+    {{#if canUnroll}}
+      <button type="button" class="close unroll" data-student-id="{{student._id}}">X</button>
+    {{/if}}
+
+    {{student.services.avans.nickname}}
+
+    {{#if isOwnEnrollment}}
+      <br><input placeholder="Samen met..." value="{{extra}}" type="text" class="extra" data-student-id="{{student._id}}">
+    {{else}}
+      <br>{{extra}}
+    {{/if}}
+  </td>
 </template>
