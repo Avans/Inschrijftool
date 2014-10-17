@@ -10,6 +10,10 @@
     cursor: pointer;
     transition: all 0.2s ease-in;
   }
+
+  .unavailable {
+    background-color: #EEE;
+  }
   td {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -110,7 +114,7 @@
         {{#with enrollmentInTimeslot index ../index}}
           {{> enrollment}}
         {{else}}
-          <td class="{{#if currentUser}}enroll{{/if}}" data-day-index={{index}} data-timeslot-index={{../index}}>
+          <td class="{{#if isUnavailableInTimeslot index ../index}}unavailable{{else}}{{#if currentUser}}enroll{{/if}}{{/if}}" data-day-index={{index}} data-timeslot-index={{../index}}>
           </td>
         {{/with}}
 

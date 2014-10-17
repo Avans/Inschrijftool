@@ -1,5 +1,6 @@
 Courses = new Mongo.Collection("courses");
 Enrollments = new Mongo.Collection("enrollments");
+Unavailable = new Mongo.Collection("unavailable");
 
 Meteor.methods({
   enroll: function(course, day, timeslot) {
@@ -12,14 +13,13 @@ Meteor.methods({
   extra: function(course, extra) {
     Enrollments.update({studentId: Meteor.user()._id, courseId: course._id}, {$set: {extra: extra.substring(0, 100)}})
   },
-/*  setUnavailable: function(course, day, timeslot, unavailable) {
-    if(unavailable) {
-      Unavailable.upsert({courseId: course._id, day: day, timeslot: timeslot});
+  toggleUnavailable: function(course, day, timeslot) {
+    if(Unavailable.findOne({courseId: course._id, day: day, timeslot: timeslot})) {
+      Unavailable.remove({courseId: course._id, day: day, timeslot: timeslot});
     } else {
-      Unavailable.delete({courseId: course._id, day: day, timeslot: timeslot});
+      Unavailable.insert({courseId: course._id, day: day, timeslot: timeslot});
     }
   },
-  */
 })
 
 if (Meteor.isClient) {
@@ -75,7 +75,10 @@ if (Meteor.isClient) {
     },
     enrollmentInTimeslot: function(day, timeslot) {
       return Enrollments.findOne({courseId: course()._id, day: day, timeslot: timeslot})
-    }
+    },
+    isUnavailableInTimeslot: function(day, timeslot) {
+      return Unavailable.findOne({courseId: course()._id, day: day, timeslot: timeslot})
+    },
   });
 
   Template.enrollment.helpers({
@@ -113,6 +116,15 @@ if (Meteor.isClient) {
       var timeslot = $(e.target).data('timeslot-index');
 
       Meteor.call('enroll', course(), day, timeslot);
+    },
+    'contextmenu .enroll,.unavailable': function(e) {
+      if(Template.enroll.isTeacher()) {
+        var day = $(e.target).data('day-index');
+        var timeslot = $(e.target).data('timeslot-index');
+
+        Meteor.call('toggleUnavailable', course(), day, timeslot);
+        e.preventDefault();
+      }
     },
     'click .unroll': function(e) {
       Meteor.call('unroll', this._id);
