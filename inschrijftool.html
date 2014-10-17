@@ -72,7 +72,14 @@
      <button class="deletecourse">Verwijder deze pagina</button>
      <label>Naam: <input type="text" value="{{course.name}}" class="course-name"></label><br>
      Dagen: <input type="number" step="1" value="{{course.number_of_days}}" class="number_of_days"><br>
-     Timeslots: <input type="number" step="1" value="{{course.number_of_timeslots}}" class="number_of_timeslots"><br>
+     Timeslots: <input type="number" step="1" value="{{course.number_of_timeslots}}" class="number_of_timeslots">
+
+     <div style="background-color: #CCC; padding: 10px; display: inline-block;">
+       start: <input type="time" id="timeslots-start" value="09:00">
+       minuten per tijdslot: <input type="number" id="timeslots-minutes" value="30">
+       <button id="timeslots-generate">Genereer</button>
+     </div>
+     <br>
 
      Max aantal studenten: {{maxNumberOfStudents}}<br>
      Max aantal studenten in duo's: {{maxNumberOfStudentsInDuos}}

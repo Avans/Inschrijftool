@@ -169,6 +169,24 @@ if (Meteor.isClient) {
       timeslots = timeslots.slice(0, number_of_timeslots);
       Courses.update(course()._id, {$set: {timeslots: timeslots, number_of_timeslots: number_of_timeslots}});
     },
+    'click #timeslots-generate': function(e) {
+      var start_time = $('#timeslots-start').val();
+      var minutes_per_timeslot = $('#timeslots-minutes').val()*1;
+      var time_in_minutes = (start_time.substring(0,2) * 60) + start_time.substring(3, 5)*1;
+
+      var timeslots = course().timeslots;
+
+      function toTime(time) {
+        return Math.floor(time / 60) + ':' + (time % 60 < 10 ? '0' : '') + (time % 60);
+      }
+
+      for(i in timeslots) {
+        timeslots[i].name = toTime(time_in_minutes) + '-' + toTime(time_in_minutes + minutes_per_timeslot);
+        time_in_minutes += minutes_per_timeslot;
+        time_in_minutes = time_in_minutes % (24*60);
+      }
+      Courses.update(course()._id, {$set: {timeslots: timeslots}});
+    },
   })
 
 
