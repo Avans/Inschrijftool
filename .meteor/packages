@@ -11,5 +11,5 @@ accounts-oauth
 oauth
 service-configuration
 oauth1
-accounts-ui-bootstrap-3
-bootstrap-3
+ian:accounts-ui-bootstrap-3
+twbs:bootstrap
