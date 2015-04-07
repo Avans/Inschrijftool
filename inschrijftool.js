@@ -2,6 +2,8 @@ Courses = new Mongo.Collection("courses");
 Enrollments = new Mongo.Collection("enrollments");
 Unavailable = new Mongo.Collection("unavailable");
 
+var number_of_slots = new Deps.Dependency();
+
 Meteor.methods({
   enroll: function(course, day, timeslot) {
     if(!Enrollments.findOne({courseId: course._id, day: day, timeslot: timeslot}))
@@ -25,25 +27,37 @@ Meteor.methods({
 if (Meteor.isClient) {
 
   course = function() {
-    return Courses.findOne({'url': Template.enroll.url()});
+    return Courses.findOne({'url': url()});
+  }
+
+  course_inert = function() {
+    return Courses.findOne({'url': url()}, {reactive: !isTeacher()});
   }
 
   enrollments = function() {
     return Enrollments.find();
   }
 
-  Template.enroll.helpers({
-    url: function() {
-      return window.location.pathname;
-    },
-
-    isTeacher: function() {
+  function isTeacher() {
       var user = Meteor.user();
       if(user) {
         return user.services.avans.employee == 'true';
       } else {
         return false;
       }
+  }
+
+  function url() {
+    return window.location.pathname;
+  }
+
+  Template.enroll.helpers({
+    url: function() {
+      return url();
+    },
+
+    isTeacher: function() {
+      return isTeacher();
     },
 
     course: function () {
@@ -51,13 +65,15 @@ if (Meteor.isClient) {
     },
 
     days: function() {
-      return course().days.map(function(doc, index, cursor) {
+      number_of_slots.depend();
+      return course_inert().days.map(function(doc, index, cursor) {
         return _.extend(doc, {index: index});
       });
     },
 
     timeslots: function() {
-      return course().timeslots.map(function(doc, index, cursor) {
+      number_of_slots.depend();
+      return course_inert().timeslots.map(function(doc, index, cursor) {
         return _.extend(doc, {index: index});
       });
     },
@@ -74,10 +90,10 @@ if (Meteor.isClient) {
       return enrollments();
     },
     enrollmentInTimeslot: function(day, timeslot) {
-      return Enrollments.findOne({courseId: course()._id, day: day, timeslot: timeslot})
+      return Enrollments.findOne({courseId: course_inert()._id, day: day, timeslot: timeslot})
     },
     isUnavailableInTimeslot: function(day, timeslot) {
-      return Unavailable.findOne({courseId: course()._id, day: day, timeslot: timeslot})
+      return Unavailable.findOne({courseId: course_inert()._id, day: day, timeslot: timeslot})
     },
   });
 
@@ -92,17 +108,17 @@ if (Meteor.isClient) {
       return this.studentId == Meteor.user()._id;
     },
     canUnroll: function() {
-      return Template.enrollment.isOwnEnrollment.call(this) || Template.enroll.isTeacher();
+      return Template.enrollment.__helpers[" isOwnEnrollment"].call(this) || isTeacher();
     }
-  })
+  });
 
   Template.enroll.events({
     'click .makecourse': function() {
       Courses.insert({
-        'url': Template.enroll.url(),
+        'url': url(),
         'name': 'Naamloos',
-        'number_of_days': 0,
-        'number_of_timeslots': 0,
+        'number_of_days': 5,
+        'number_of_timeslots': 5,
         'days': [],
         'timeslots': [],
       });
@@ -118,7 +134,7 @@ if (Meteor.isClient) {
       Meteor.call('enroll', course(), day, timeslot);
     },
     'contextmenu .enroll,.unavailable': function(e) {
-      if(Template.enroll.isTeacher()) {
+      if(isTeacher()) {
         var day = $(e.target).data('day-index');
         var timeslot = $(e.target).data('timeslot-index');
 
@@ -131,13 +147,6 @@ if (Meteor.isClient) {
     },
     'input .extra': function(e) {
       Meteor.call('extra', course(), e.target.value);
-    },
-
-    'input .day': function(e) {
-      var day = $(e.target).data('day-index');
-      var days = course().days;
-      days[day].name = e.target.value;
-      Courses.update(course()._id, {$set: {days: days}});
     },
     'input .day': function(e) {
       var day = $(e.target).data('day-index');
@@ -153,6 +162,7 @@ if (Meteor.isClient) {
       }
       days = days.slice(0, number_of_days);
       Courses.update(course()._id, {$set: {days: days, number_of_days: number_of_days}});
+      number_of_slots.changed();
     },
     'input .timeslot': function(e) {
       var timeslot = $(e.target).data('timeslot-index');
@@ -168,6 +178,7 @@ if (Meteor.isClient) {
       }
       timeslots = timeslots.slice(0, number_of_timeslots);
       Courses.update(course()._id, {$set: {timeslots: timeslots, number_of_timeslots: number_of_timeslots}});
+      number_of_slots.changed();
     },
     'click #timeslots-generate': function(e) {
       var start_time = $('#timeslots-start').val();
@@ -186,6 +197,7 @@ if (Meteor.isClient) {
         time_in_minutes = time_in_minutes % (24*60);
       }
       Courses.update(course()._id, {$set: {timeslots: timeslots}});
+      number_of_slots.changed();
     },
   })
 
