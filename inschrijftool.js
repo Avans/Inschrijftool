@@ -4,6 +4,15 @@ Unavailable = new Mongo.Collection("unavailable");
 
 var number_of_slots = new Deps.Dependency();
 
+function isTeacher() {
+    var user = Meteor.user();
+    if(user) {
+      return user.services.avans.employee == 'true';
+    } else {
+      return false;
+    }
+}
+
 Meteor.methods({
   enroll: function(course, day, timeslot) {
     if(!Enrollments.findOne({courseId: course._id, day: day, timeslot: timeslot}))
@@ -16,12 +25,21 @@ Meteor.methods({
     Enrollments.update({studentId: Meteor.user()._id, courseId: course._id}, {$set: {extra: extra.substring(0, 100)}})
   },
   toggleUnavailable: function(course, day, timeslot) {
-    if(Unavailable.findOne({courseId: course._id, day: day, timeslot: timeslot})) {
-      Unavailable.remove({courseId: course._id, day: day, timeslot: timeslot});
-    } else {
-      Unavailable.insert({courseId: course._id, day: day, timeslot: timeslot});
+    if(isTeacher()) {
+      if(Unavailable.findOne({courseId: course._id, day: day, timeslot: timeslot})) {
+        Unavailable.remove({courseId: course._id, day: day, timeslot: timeslot});
+      } else {
+        Unavailable.insert({courseId: course._id, day: day, timeslot: timeslot});
+      }
     }
   },
+  removeCourse: function(course) {
+    if(isTeacher()) {
+      Courses.remove({_id: course._id});
+      Unavailable.remove({courseId: course._id});
+      Enrollments.remove({courseId: course._id});
+    }
+  }
 })
 
 if (Meteor.isClient) {
@@ -36,15 +54,6 @@ if (Meteor.isClient) {
 
   enrollments = function() {
     return Enrollments.find();
-  }
-
-  function isTeacher() {
-      var user = Meteor.user();
-      if(user) {
-        return user.services.avans.employee == 'true';
-      } else {
-        return false;
-      }
   }
 
   function url() {
@@ -79,11 +88,11 @@ if (Meteor.isClient) {
     },
 
     maxNumberOfStudents: function() {
-      return course().days.length * course().timeslots.length
+      return course().days.length * course().timeslots.length - Unavailable.find({courseId: course()._id}).count();
     },
 
     maxNumberOfStudentsInDuos: function() {
-      return course().days.length * course().timeslots.length * 2;
+      return Template.enroll.__helpers[' maxNumberOfStudents']() * 2;
     },
 
     enrollments: function() {
@@ -117,11 +126,16 @@ if (Meteor.isClient) {
       Courses.insert({
         'url': url(),
         'name': 'Naamloos',
-        'number_of_days': 5,
-        'number_of_timeslots': 5,
+        'number_of_days': 0,
+        'number_of_timeslots': 0,
         'days': [],
         'timeslots': [],
       });
+    },
+    'click .deletecourse': function() {
+      if(confirm('Wil je deze pagina met alle inschrijvingen verwijderen?')) {
+        Meteor.call('removeCourse', course());
+      }
     },
 
     'input .course-name': function(e) {
