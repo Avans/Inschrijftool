@@ -13,13 +13,27 @@ function isTeacher() {
     }
 }
 
+Courses.allow({
+  update: isTeacher,
+  insert: isTeacher,
+});
+
+Unavailable.allow({
+  update: isTeacher,
+  insert: isTeacher,
+  remove: isTeacher,
+})
+
 Meteor.methods({
   enroll: function(course, day, timeslot) {
-    if(!Enrollments.findOne({courseId: course._id, day: day, timeslot: timeslot}))
+    if(  !Enrollments.findOne({courseId: course._id, day: day, timeslot: timeslot})
+      && !Unavailable.findOne({courseId: course._id, day: day, timeslot: timeslot}))
       Enrollments.upsert({studentId: Meteor.user()._id, courseId: course._id}, {$set: {day: day, timeslot: timeslot}}, {upsert: true})
   },
   unroll: function(id) {
-    Enrollments.remove({_id: id});
+    if(isTeacher() || Enrollments.findOne({_id: id, studentId: Meteor.user()._id})) {
+      Enrollments.remove({_id: id});
+    }
   },
   extra: function(course, extra) {
     Enrollments.update({studentId: Meteor.user()._id, courseId: course._id}, {$set: {extra: extra.substring(0, 100)}})
