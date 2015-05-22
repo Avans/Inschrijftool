@@ -2,6 +2,21 @@ Courses = new Mongo.Collection("courses");
 Enrollments = new Mongo.Collection("enrollments");
 Unavailable = new Mongo.Collection("unavailable");
 
+if(Meteor.isServer) {
+  Meteor.publish("user", function () {
+    return Meteor.users.find({_id: this.userId}, {fields: {'services.avans': 1,}});
+  });
+  Meteor.publish("course", function (url) {
+    return Courses.find({'url': url});
+  });
+  Meteor.publish("enrollments", function (url) {
+    return Enrollments.find({courseId: Courses.findOne({'url': url})._id});
+  });
+  Meteor.publish("unavailable", function (url) {
+    return Unavailable.find({courseId: Courses.findOne({'url': url})._id});
+  });
+}
+
 var number_of_slots = new Deps.Dependency();
 
 function isTeacher() {
@@ -73,6 +88,11 @@ if (Meteor.isClient) {
   function url() {
     return window.location.pathname;
   }
+
+  Meteor.subscribe("user");
+  Meteor.subscribe("course", url());
+  Meteor.subscribe("enrollments", url());
+  Meteor.subscribe("unavailable", url());
 
   Template.enroll.helpers({
     url: function() {
