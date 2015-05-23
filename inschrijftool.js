@@ -16,6 +16,112 @@ if(Meteor.isServer) {
     return Unavailable.find({courseId: Courses.findOne({'url': url})._id});
   });
 }
+Router.route('/:url.ics', function (f) {
+  var course = Courses.findOne({'url': '/'+this.params.url});
+  var enrollments = Enrollments.find({courseId: course._id}).fetch();
+
+  // Dates to UTC
+  var dates = course.days.map(function(day_string) {
+    // Guess month
+    var month = 0;
+    var months = [/jan/i, /feb/i, /maart/i, /apr/i, /mei/i, /jun/i, /jul/i, /aug/i, /sep/i, /okt/i, /nov/i, /dec/i];
+    for(var i = 0; i < months.length; i++) {
+      if(day_string.name.search(months[i]) !== -1) {
+        month = i;
+      }
+    }
+
+    // Guess day
+    var day = 1;
+    try {
+      day = parseInt(day_string.name.match(/[0-9]+/)[0]);
+    } catch (e) {
+    }
+
+    // Guess year
+    var current_year = (new Date()).getFullYear();
+    var year = current_year;
+    if(Math.abs(new Date(current_year+1, month, day) - new Date()) < Math.abs(new Date(current_year, month, day) - new Date())) {
+      year = current_year + 1;
+    }
+
+    return Date.UTC(year, month, day);
+  });
+
+  // Times to UTC
+  var times = course.timeslots.map(function(timeslot) {
+    var range = timeslot.name.match(/[0-9]{1,2}:[0-9]{1,2}/g);
+    range = range.map(function time(string) {
+      var hour = string.split(':')[0]*60*60*1000;
+      var minute = string.split(':')[1]*60*1000;
+      return hour + minute;
+    });
+    return range;
+  });
+
+  // Output
+  content = 'BEGIN:VCALENDAR\r\n';
+  content += 'VERSION:2.0\r\n';
+  content += 'PRODID:-//hacksw/handcal//NONSGML v1.0//EN\r\n';
+  content += 'BEGIN:VTIMEZONE\r\n';
+  content += 'TZID:Europe/Amsterdam\r\n';
+  content += 'X-LIC-LOCATION:Europe/Amsterdam\r\n';
+  content += 'BEGIN:DAYLIGHT\r\n';
+  content += 'TZOFFSETFROM:+0100\r\n';
+  content += 'TZOFFSETTO:+0200\r\n';
+  content += 'TZNAME:CEST\r\n';
+  content += 'DTSTART:19700329T020000\r\n';
+  content += 'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\r\n';
+  content += 'END:DAYLIGHT\r\n';
+  content += 'BEGIN:STANDARD\r\n';
+  content += 'TZOFFSETFROM:+0200\r\n';
+  content += 'TZOFFSETTO:+0100\r\n';
+  content += 'TZNAME:CET\r\n';
+  content += 'DTSTART:19701025T030000\r\n';
+  content += 'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\r\n';
+  content += 'END:STANDARD\r\n';
+  content += 'END:VTIMEZONE\r\n';
+
+  for(var i = 0; i < enrollments.length; i++) {
+    var start_timestamp = dates[enrollments[i].day] + times[enrollments[i].timeslot][0];
+    var end_timestamp = dates[enrollments[i].day] + times[enrollments[i].timeslot][1];
+    var student = Meteor.users.findOne({_id: enrollments[i].studentId});
+
+    function date(d) {
+      var d = new Date(d);
+
+      function dd(number) {
+        if(number < 10) {
+          return '0'+number;
+        } else {
+          return number;
+        }
+
+      }
+      return d.getUTCFullYear() + '' + dd(d.getUTCMonth()+1) + '' + dd(d.getUTCDate())
+              + 'T' + dd(d.getUTCHours()) + '' + dd(d.getUTCMinutes()) + '00';
+    }
+
+    content += 'BEGIN:VEVENT\r\n';
+    content += 'DTSTART;TZID=Europe/Amsterdam:' + date(start_timestamp) + '\r\n'
+    content += 'DTEND;TZID=Europe/Amsterdam:' + date(end_timestamp) + '\r\n'
+    content += 'SUMMARY:' + student.profile.name + '\r\n'
+    content += 'LOCATION:' + enrollments[i].extra + '\r\n'
+    content += 'END:VEVENT\r\n'
+  }
+  content += 'END:VCALENDAR'
+
+  this.response.writeHead(200, {
+    'Content-Type': 'text/calendar; charset-utf-8',
+    'Content-Disposition': 'inline; filename='+this.params.url+'.ics',
+    'Cache-Control': 'max-age=3600, private, must-revalidate',
+  });
+  this.response.end(content);
+}, {where: 'server'});
+
+Router.route('/:page', function () {
+  this.render('enroll');
+});
 
 var number_of_slots = new Deps.Dependency();
 
@@ -105,6 +211,10 @@ if (Meteor.isClient) {
 
     course: function () {
       return course();
+    },
+
+    cal_url: function() {
+      return Meteor.absoluteUrl(course().url.substring(1) + '.ics').replace('http://', '');
     },
 
     days: function() {

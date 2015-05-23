@@ -11,3 +11,4 @@ service-configuration
 oauth1
 ian:accounts-ui-bootstrap-3
 twbs:bootstrap
+iron:router

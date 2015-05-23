@@ -37,7 +37,6 @@
 </head>
 
 <body>
-  {{> enroll}}
 </body>
 
 <template name="enroll">
@@ -69,6 +68,11 @@
 
    {{#if isTeacher}}
    <div class="well hidden-print">
+         <ul style="float: right">
+          <li><a href="https://www.google.com/calendar/render?cid=http://{{cal_url}}">Voeg toe aan Google Calendar</a></li>
+          <li><a href="webcal://{{cal_url}}">Voeg toe aan lokale kalender</a></li>
+          <li><a href="//{{cal_url}}">Download .ics bestand</a></li>
+        </ul>
      <button class="deletecourse">Verwijder deze pagina</button>
      <label>Naam: <input type="text" value="{{course.name}}" class="course-name"></label><br>
      Dagen: <input type="number" step="1" value="{{course.number_of_days}}" class="number_of_days"><br>
