@@ -6,6 +6,10 @@ if(Meteor.isServer) {
   Meteor.publish("user", function () {
     return Meteor.users.find({_id: this.userId}, {fields: {'services.avans': 1,}});
   });
+  Meteor.publish("course_users", function (url) {
+    var userIds = Enrollments.find({courseId: Courses.findOne({'url': url})._id}).map(function(e) { return e.studentId });
+    return Meteor.users.find({_id: {$in: userIds}}, {fields: {'services.avans': 1,}});
+  });
   Meteor.publish("course", function (url) {
     return Courses.find({'url': url});
   });
@@ -200,6 +204,7 @@ if (Meteor.isClient) {
   }
 
   Meteor.subscribe("user");
+  Meteor.subscribe("course_users", url());
   Meteor.subscribe("course", url());
   Meteor.subscribe("enrollments", url());
   Meteor.subscribe("unavailable", url());
