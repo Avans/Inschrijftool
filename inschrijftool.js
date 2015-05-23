@@ -50,13 +50,17 @@ Router.route('/:url.ics', function (f) {
 
   // Times to UTC
   var times = course.timeslots.map(function(timeslot) {
-    var range = timeslot.name.match(/[0-9]{1,2}:[0-9]{1,2}/g);
-    range = range.map(function time(string) {
-      var hour = string.split(':')[0]*60*60*1000;
-      var minute = string.split(':')[1]*60*1000;
-      return hour + minute;
-    });
-    return range;
+    try {
+      var range = timeslot.name.match(/[0-9]{1,2}:[0-9]{1,2}/g);
+      range = range.map(function time(string) {
+        var hour = string.split(':')[0]*60*60*1000;
+        var minute = string.split(':')[1]*60*1000;
+        return hour + minute;
+      });
+      return range;
+    } catch(e) {
+      return [0, 0];
+    }
   });
 
   // Output
