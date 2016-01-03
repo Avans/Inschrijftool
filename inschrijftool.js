@@ -7,17 +7,32 @@ if(Meteor.isServer) {
     return Meteor.users.find({_id: this.userId}, {fields: {'services.avans': 1,}});
   });
   Meteor.publish("course_users", function (url) {
-    var userIds = Enrollments.find({courseId: Courses.findOne({'url': url})._id}).map(function(e) { return e.studentId });
-    return Meteor.users.find({_id: {$in: userIds}}, {fields: {'services.avans': 1,}});
+    var course = Courses.findOne({'url': url})
+    if(course !== undefined) {
+      var userIds = Enrollments.find({courseId: course._id}).map(function(e) { return e.studentId });
+      return Meteor.users.find({_id: {$in: userIds}}, {fields: {'services.avans': 1,}});
+    } else {
+      return [];
+    }
   });
   Meteor.publish("course", function (url) {
     return Courses.find({'url': url});
   });
   Meteor.publish("enrollments", function (url) {
-    return Enrollments.find({courseId: Courses.findOne({'url': url})._id});
+    var course = Courses.findOne({'url': url});
+    if(course !== undefined) {
+      return Enrollments.find({courseId: course._id});
+    } else {
+      return [];
+    }
   });
   Meteor.publish("unavailable", function (url) {
-    return Unavailable.find({courseId: Courses.findOne({'url': url})._id});
+    var course = Courses.findOne({'url': url});
+    if(course !== undefined) {
+     return Unavailable.find({courseId: course._id});
+    } else {
+      return [];
+    }
   });
 }
 Router.route('/:url.ics', function (f) {
