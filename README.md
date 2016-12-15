@@ -1,4 +1,0 @@
-Inschrijftool
-=============
-
-Yet another inschrijftool
