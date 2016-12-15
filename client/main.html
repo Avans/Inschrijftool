@@ -22,7 +22,7 @@
         </ul>
         <ul class="nav navbar-nav navbar-right">
           {{#if currentUser}}<li class="navbar-text">Ingelogd als {{currentUser.services.avans.nickname}}</li>{{/if}}
-          <!-- {{> loginButtons }} -->
+          {{> loginButtons }}
         </ul>
       </nav>
     </div>
@@ -100,9 +100,6 @@
   </table>
 </div>
 
-
-
-
    {{else}}
      {{#if isTeacher}}
      <div class="alert alert-info">
@@ -111,4 +108,20 @@
      </div>
      {{/if}}
    {{/if}}
+</template>
+
+<template name="enrollment">
+  <td class="{{#if isOwnEnrollment}}info{{else}}warning{{/if}}">
+    {{#if canUnroll}}
+      <button type="button" class="close unroll" data-student-id="{{student._id}}">X</button>
+    {{/if}}
+
+    {{student.services.avans.nickname}}
+
+    {{#if isOwnEnrollment}}
+      <br><input placeholder="Samen met..." value="{{extra}}" type="text" class="extra" data-student-id="{{student._id}}">
+    {{else}}
+      <br>{{extra}}
+    {{/if}}
+  </td>
 </template>
