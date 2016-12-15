@@ -20,4 +20,9 @@ shell-server@0.2.1            # Server-side component of the `meteor shell` comm
 
 twbs:bootstrap
 accounts-oauth
-accounts-ui
+service-configuration
+random
+stylus
+ian:accounts-ui-bootstrap-3
+oauth1
+oauth
