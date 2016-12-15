@@ -3,23 +3,112 @@
 </head>
 
 <body>
-  <h1>Welcome to Meteor!</h1>
-
-  {{> hello}}
-  {{> info}}
+  {{> enroll}}
 </body>
 
-<template name="hello">
-  <button>Click Me</button>
-  <p>You've pressed the button {{counter}} times.</p>
-</template>
+<template name="enroll">
+  <header class="navbar navbar-default" id="top" role="banner">
+    <div class="container">
+      <div class="navbar-header">
+        <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+        </button>
+        <a class="navbar-brand">{{course.name}}</a>
+      </div>
+      <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
 
-<template name="info">
-  <h2>Learn Meteor!</h2>
-  <ul>
-    <li><a href="https://www.meteor.com/try" target="_blank">Do the Tutorial</a></li>
-    <li><a href="http://guide.meteor.com" target="_blank">Follow the Guide</a></li>
-    <li><a href="https://docs.meteor.com" target="_blank">Read the Docs</a></li>
-    <li><a href="https://forums.meteor.com" target="_blank">Discussions</a></li>
-  </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a></a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          {{#if currentUser}}<li class="navbar-text">Ingelogd als {{currentUser.services.avans.nickname}}</li>{{/if}}
+          <!-- {{> loginButtons }} -->
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+   {{#if course}}
+
+   {{#if isTeacher}}
+   <div class="well hidden-print">
+         <ul style="float: right">
+          <li><a href="https://www.google.com/calendar/render?cid=http://{{cal_url}}">Voeg toe aan Google Calendar</a></li>
+          <li><a href="webcal://{{cal_url}}">Voeg toe aan lokale kalender</a></li>
+          <li><a href="//{{cal_url}}">Download .ics bestand</a></li>
+        </ul>
+     <button class="deletecourse">Verwijder deze pagina</button>
+     <label>Naam: <input type="text" value="{{course.name}}" class="course-name"></label><br>
+     Dagen: <input type="number" step="1" value="{{course.number_of_days}}" class="number_of_days"><br>
+     Timeslots: <input type="number" step="1" value="{{course.number_of_timeslots}}" class="number_of_timeslots">
+
+     <div style="background-color: #CCC; padding: 10px; display: inline-block;">
+       start: <input type="time" id="timeslots-start" value="09:00">
+       minuten per tijdslot: <input type="number" id="timeslots-minutes" value="30">
+       <button id="timeslots-generate">Genereer</button>
+     </div>
+     <br>
+
+     Max aantal studenten: {{maxNumberOfStudents}}<br>
+     Max aantal studenten in duo's: {{maxNumberOfStudentsInDuos}}
+    </div>
+    {{/if}}
+
+   <div style="width: 80%; margin: 0 auto;">
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th></th>
+        {{#each days}}
+        <th>
+          {{#if isTeacher}}
+            <input value="{{name}}" data-day-index="{{index}}" class="day hidden-print">
+            <span class="visible-print">{{name}}</span>
+          {{else}}
+            {{name}}
+          {{/if}}
+        </th>
+        {{/each}}
+      </tr>
+    </thead>
+
+    <tbody>
+      {{#each timeslots}}
+      <tr>
+        <th>
+          {{#if isTeacher}}
+            <input value="{{name}}" data-timeslot-index="{{index}}" class="timeslot hidden-print">
+            <span class="visible-print">{{name}}</span>
+          {{else}}
+            {{name}}
+          {{/if}}
+        </th>
+
+        {{#each days}}
+
+        {{#with enrollmentInTimeslot index ../index}}
+          {{> enrollment}}
+        {{else}}
+          <td class="{{#if isUnavailableInTimeslot index ../index}}unavailable{{else}}{{#if currentUser}}enroll{{/if}}{{/if}}" data-day-index={{index}} data-timeslot-index={{../index}}>
+          </td>
+        {{/with}}
+
+        {{/each}}
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+
+
+
+
+   {{else}}
+     {{#if isTeacher}}
+     <div class="alert alert-info">
+       <p>Er is nog geen inschrijving actief op deze url</p>
+       <button class="btn btn-primary makecourse">Maak inschrijving aan op {{url}}</button>
+     </div>
+     {{/if}}
+   {{/if}}
 </template>
