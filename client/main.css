@@ -1,0 +1,32 @@
+.navbar-nav .btn {
+    margin-bottom: 8px;
+    margin-top: 8px;
+}
+
+.enroll:hover {
+    cursor: pointer;
+    transition: all 0.2s ease-in;
+}
+.unavailable {
+    background-color: #EEE;
+}
+
+td {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+    height: 50px;
+    transition: all 0.2s ease-out;
+}
+
+td .unroll {
+    opacity: 0;
+}
+
+td:hover .unroll {
+    opacity: .2;
+}

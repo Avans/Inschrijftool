@@ -2,21 +2,7 @@ Accounts.oauth.registerService('avans');
 
 if(Meteor.isClient) {
   Meteor.loginWithAvans = function(options, callback) {
-    // support a callback without options
-    if (! callback && typeof options === "function") {
-      callback = options;
-      options = null;
-    }
-
     var credentialRequestCompleteCallback = Accounts.oauth.credentialRequestCompleteHandler(callback);
-
-    // support both (options, callback) and (callback).
-    if (!credentialRequestCompleteCallback && typeof options === 'function') {
-      credentialRequestCompleteCallback = options;
-      options = {};
-    } else if (!options) {
-      options = {};
-    }
 
     var config = ServiceConfiguration.configurations.findOne({service: 'avans'});
     if (!config) {
@@ -37,9 +23,7 @@ if(Meteor.isClient) {
         popupOptions: { height: 406 }
       });
   };
-}
-
-if (Meteor.isServer) {
+} else {
   Accounts.addAutopublishFields({
       forLoggedInUser: ['services.avans'],
       forOtherUsers: ['services.avans'],
@@ -66,12 +50,13 @@ if (Meteor.isServer) {
     };
   });
 
-  ServiceConfiguration.configurations.remove({
-    service: "avans"
-  });
-  ServiceConfiguration.configurations.insert({
-    service: "avans",
-    consumerKey: "90cc4fbf7ebb50e84b1f9e1189c7e8f4c48cda2b",
-    secret: "94ad62cc15a4debeff7865a5520a54b72087eaab"
-  });
+  ServiceConfiguration.configurations.upsert(
+    { service: "avans" },
+    {
+      $set: {
+        consumerKey: "90cc4fbf7ebb50e84b1f9e1189c7e8f4c48cda2b",
+        secret: "94ad62cc15a4debeff7865a5520a54b72087eaab"
+      }
+    }
+  );
 }

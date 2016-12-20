@@ -1,39 +1,5 @@
 <head>
-  <title>Inschrijftool</title>
-  <style>
-  .navbar-nav .btn {
-    margin-bottom: 8px;
-    margin-top: 8px;
-  }
-
-  .enroll:hover {
-    cursor: pointer;
-    transition: all 0.2s ease-in;
-  }
-
-  .unavailable {
-    background-color: #EEE;
-  }
-  td {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    cursor: default;
-    height: 50px;
-    transition: all 0.2s ease-out;
-  }
-  td .unroll {
-    opacity: 0;
-
-  }
-
-  td:hover .unroll {
-    opacity: .2;
-  }
-  </style>
+  <link rel="shortcut icon" type="image/png" href="/favicon.png"/>
 </head>
 
 <body>
@@ -45,11 +11,8 @@
       <div class="navbar-header">
         <button class="navbar-toggle collapsed" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
           <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand">{{course.name}}</a>
+        <a class="navbar-brand">{{title}}</a>
       </div>
       <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
 
@@ -57,7 +20,6 @@
           <li><a></a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
-          {{#if currentUser}}<li class="navbar-text">Ingelogd als {{currentUser.services.avans.nickname}}</li>{{/if}}
           {{> loginButtons }}
         </ul>
       </nav>
@@ -135,9 +97,6 @@
     </tbody>
   </table>
 </div>
-
-
-
 
    {{else}}
      {{#if isTeacher}}

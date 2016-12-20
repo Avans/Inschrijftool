@@ -150,7 +150,7 @@ var number_of_slots = new Deps.Dependency();
 
 function isTeacher() {
     var user = Meteor.user();
-    if(user) {
+    if(user && user.services) {
       return user.services.avans.employee == 'true';
     } else {
       return false;
@@ -237,6 +237,16 @@ if (Meteor.isClient) {
       return course();
     },
 
+    title: function() {
+      var c = course();
+      var title = '';
+      if(c) {
+        title = c.name;
+      }
+      document.title = title + ' inschrijven';
+      return title;
+    },
+
     cal_url: function() {
       return Meteor.absoluteUrl(course().url.substring(1) + '.ics').replace('http://', '');
     },
@@ -294,11 +304,13 @@ if (Meteor.isClient) {
       Courses.insert({
         'url': url(),
         'name': 'Naamloos',
-        'number_of_days': 0,
-        'number_of_timeslots': 0,
-        'days': [],
-        'timeslots': [],
+        'number_of_days': 2,
+        'number_of_timeslots': 4,
+        'days': [{'name': ''}, {'name': ''}],
+        'timeslots': [{'name': ''}, {'name': ''}, {'name': ''}, {'name': ''}],
       });
+      Meteor.subscribe("enrollments", url());
+      Meteor.subscribe("unavailable", url());
     },
     'click .deletecourse': function() {
       if(confirm('Wil je deze pagina met alle inschrijvingen verwijderen?')) {
@@ -370,7 +382,7 @@ if (Meteor.isClient) {
       var timeslots = course().timeslots;
 
       function toTime(time) {
-        return Math.floor(time / 60) + ':' + (time % 60 < 10 ? '0' : '') + (time % 60);
+        return Math.floor(time / 60) % 24 + ':' + (time % 60 < 10 ? '0' : '') + (time % 60);
       }
 
       for(i in timeslots) {
