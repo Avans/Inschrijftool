@@ -26,3 +26,4 @@ stylus
 ian:accounts-ui-bootstrap-3
 oauth1
 oauth
+iron:router
