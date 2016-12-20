@@ -123,3 +123,15 @@
     {{/if}}
   </td>
 </template>
+
+<template name="home">
+  <div class="home">
+    <h1>Inschrijftool</h1>
+    <img src="/favicon.png">
+
+    <h2>
+      http://inschrijven.aii.avans.nl/<input type="text" id="url" placeholder="Pagina naam..." />
+      <button onclick="window.location = '/' + $('#url').val();">Ga</button>
+    </h2>
+  </div>
+</template>

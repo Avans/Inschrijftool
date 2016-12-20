@@ -30,3 +30,15 @@ td .unroll {
 td:hover .unroll {
     opacity: .2;
 }
+
+.home {
+    text-align: center;
+}
+
+.home h2 {
+    font-weight: 300;
+    text-align: center;
+}
+.home input {
+
+}

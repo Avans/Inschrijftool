@@ -142,6 +142,10 @@ Router.route('/:url.ics', function (f) {
   this.response.end(content);
 }, {where: 'server'});
 
+Router.route('/', function () {
+  this.render('home');
+});
+
 Router.route('/:page', function () {
   this.render('enroll');
 });
