@@ -237,6 +237,16 @@ if (Meteor.isClient) {
       return course();
     },
 
+    title: function() {
+      var c = course();
+      var title = '';
+      if(c) {
+        title = c.name;
+      }
+      document.title = title + ' inschrijven';
+      return title;
+    },
+
     cal_url: function() {
       return Meteor.absoluteUrl(course().url.substring(1) + '.ics').replace('http://', '');
     },
@@ -294,10 +304,10 @@ if (Meteor.isClient) {
       Courses.insert({
         'url': url(),
         'name': 'Naamloos',
-        'number_of_days': 0,
-        'number_of_timeslots': 0,
-        'days': [],
-        'timeslots': [],
+        'number_of_days': 2,
+        'number_of_timeslots': 4,
+        'days': [{'name': ''}, {'name': ''}],
+        'timeslots': [{'name': ''}, {'name': ''}, {'name': ''}, {'name': ''}],
       });
       Meteor.subscribe("enrollments", url());
       Meteor.subscribe("unavailable", url());
