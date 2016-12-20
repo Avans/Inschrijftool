@@ -150,7 +150,7 @@ var number_of_slots = new Deps.Dependency();
 
 function isTeacher() {
     var user = Meteor.user();
-    if(user) {
+    if(user && user.services) {
       return user.services.avans.employee == 'true';
     } else {
       return false;
@@ -299,6 +299,8 @@ if (Meteor.isClient) {
         'days': [],
         'timeslots': [],
       });
+      Meteor.subscribe("enrollments", url());
+      Meteor.subscribe("unavailable", url());
     },
     'click .deletecourse': function() {
       if(confirm('Wil je deze pagina met alle inschrijvingen verwijderen?')) {
