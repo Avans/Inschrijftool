@@ -382,7 +382,7 @@ if (Meteor.isClient) {
       var timeslots = course().timeslots;
 
       function toTime(time) {
-        return Math.floor(time / 60) + ':' + (time % 60 < 10 ? '0' : '') + (time % 60);
+        return Math.floor(time / 60) % 24 + ':' + (time % 60 < 10 ? '0' : '') + (time % 60);
       }
 
       for(i in timeslots) {
